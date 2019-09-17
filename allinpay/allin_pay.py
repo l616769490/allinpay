@@ -86,8 +86,8 @@ class AllinPay(object):
         :param **kw: 其他支付信息
         '''
         self.values['randomstr'] = getRandomStr()
-        self.values['trxamt'] = money
-        self.values['reqsn'] = reqsn
+        self.values['trxamt'] = str(money)
+        self.values['reqsn'] = str(reqsn)
         self.values.update(kw)
 
         self.values['sign'] = createSign(self.values, self.md5Key)

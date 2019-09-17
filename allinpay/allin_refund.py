@@ -6,7 +6,7 @@ from .allin_utils import getRandomStr, createSign
 
 _log = logging.getLogger()
 
-# 交易撤销接口
+# 交易退款接口
 _REFUND_URL = 'https://vsp.allinpay.com/apiweb/unitorder/refund'
 
 class AllinRefund(object):
@@ -51,8 +51,8 @@ class AllinRefund(object):
         :param **kw: 其他支付信息
         '''
         self.values['randomstr'] = getRandomStr()
-        self.values['trxamt'] = money
-        self.values['reqsn'] = reqsn
+        self.values['trxamt'] = str(money)
+        self.values['reqsn'] = str(reqsn)
         self.values.update(kw)
 
         self.values['sign'] = createSign(self.values, self.md5Key)

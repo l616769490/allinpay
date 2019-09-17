@@ -36,7 +36,7 @@ def createSign(values, md5Key):
     # 拼接
     for i in sortArr:
         if i[1] != '':
-            signStr += i[0] + '=' + i[1] + '&'
+            signStr += str(i[0]) + '=' + str(i[1]) + '&'
     signStr = signStr.strip('&')
     # MD5
     m2 = hashlib.md5()   

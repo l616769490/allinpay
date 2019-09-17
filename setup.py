@@ -13,7 +13,7 @@ from setuptools import setup, find_packages		# 没有这个库的可以通过pip
 
 setup(
     name = "allinpay",
-    version = "0.0.1",
+    version = "0.0.3",
     keywords = ("pip", "pathtool","timetool", "magetool", "mage"),							
     description = "通联支付python工具",
     long_description = "通联支付python工具",
