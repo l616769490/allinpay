@@ -1,7 +1,1 @@
-# 通联支付工具库
-由于通联支付官方没有出python的通用工具，特意写了一个，功能比较简单，只测试了支付宝支付，其他的请自行测试！
-
-## 安装使用
-``` shell
-pip install allinpay
-```
+#### 本库已转移到[新地址](https://github.com/xingluoxingkong/)
