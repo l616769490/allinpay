@@ -1,50 +1,55 @@
 import json
+import hashlib
 import logging
 import requests
 from .allin_utils import getRandomStr, createSign
 
 _log = logging.getLogger()
 
-# 接口地址
-_AUTH_CODE_TO_USERID_URL = 'https://vsp.allinpay.com/apiweb/unitorder/authcodetouserid'
+# 微信人脸支付接口
+_WX_FACE_PAY_URL = 'https://vsp.allinpay.com/apiweb/unitorder/refund'
 
-class AllinAuthCode(object):
+class AllinWXFacePay(object):
 
     @staticmethod
-    def DebugAllinAuthCode():
+    def DebugAllinWXFacePay():
         ''' 测试用的支付接口
         '''
-        return AllinAuthCode('990440148166000', '00000003', 'a0ea3fa20dbd7bb4d5abf1d59d63bae8')
+        return AllinWXFacePay('100581048160005', '990440148166000', '00000003', 'a0ea3fa20dbd7bb4d5abf1d59d63bae8')
 
-    def __init__(self, cusid, appid, md5Key):
-        ''' 统一支付接口
+    def __init__(self, orgid, cusid, appid, md5Key):
+        ''' 部分退款接口
+        :param orgid: 机构id
         :param cusid: 商户id
         :param appid: 应用id
         :param md5Key: 签名所用的key
         '''
         self.values = {}
+        self.values['orgid'] = orgid
         self.values['cusid'] = cusid
         self.values['appid'] = appid
         self.md5Key = md5Key
         self.values['version'] = '11'
 
-    def setAuthType(self, authtype):
-        ''' 授权码类型
+
+    def setRawdata(self, rawdata):
+        ''' 
         '''
-        self.values['authtype'] = authtype
+        self.values['rawdata'] = rawdata
         return self
     
-    def setSubAppid(self, sub_appid):
+    def setSubappid(self, subappid):
         ''' 微信支付appid
         '''
-        self.values['sub_appid'] = sub_appid
+        self.values['subappid'] = subappid
         return self
 
-    def authcode(self, authcode, **kw):
-        ''' 获取用户ID
+    def facePay(self, storeid, storename, **kw):
+        ''' 
         '''
         self.values['randomstr'] = getRandomStr()
-        self.values['authcode'] = authcode
+        self.values['storeid'] = storeid
+        self.values['storename'] = storename
         self.values.update(kw)
 
         self.values['sign'] = createSign(self.values, self.md5Key)
@@ -73,15 +78,15 @@ class AllinAuthCode(object):
                 else:
                     return False
         else:
-            if all (k in self.values for k in ('cusid', 'appid', 'authcode', 'authtype', 'randomstr', 'sign')):
+            if all (k in self.values for k in ('orgid', 'cusid', 'appid', 'storeid', 'storename', 'rawdata', 'subappid', 'randomstr', 'sign')):
                 return True
             
         return False
 
     def _post(self):
-        ''' 发送post请求
+        ''' 发送post请求获取二维码
         '''
-        r = requests.post(_AUTH_CODE_TO_USERID_URL, self.values)
+        r = requests.post(_WX_FACE_PAY_URL, self.values)
         text = json.loads(r.text)
-        _log.info('用户发起支付请求，请求参数：%s，请求结果：%s' % (self.values, text))
+        _log.info('用户发起退款请求，请求参数：%s，请求结果：%s' % (self.values, text))
         return text

@@ -1,50 +1,58 @@
 import json
+import hashlib
 import logging
 import requests
 from .allin_utils import getRandomStr, createSign
 
 _log = logging.getLogger()
 
-# 接口地址
-_AUTH_CODE_TO_USERID_URL = 'https://vsp.allinpay.com/apiweb/unitorder/authcodetouserid'
+# 交易撤销接口
+_CANCEL_URL = 'https://vsp.allinpay.com/apiweb/unitorder/cancel'
 
-class AllinAuthCode(object):
+class AllinCancel(object):
 
     @staticmethod
-    def DebugAllinAuthCode():
-        ''' 测试用的支付接口
+    def DebugAllinCancel():
+        ''' 测试用的接口
         '''
-        return AllinAuthCode('990440148166000', '00000003', 'a0ea3fa20dbd7bb4d5abf1d59d63bae8')
+        return AllinCancel('100581048160005', '990440148166000', '00000003', 'a0ea3fa20dbd7bb4d5abf1d59d63bae8')
 
-    def __init__(self, cusid, appid, md5Key):
-        ''' 统一支付接口
+    def __init__(self, orgid, cusid, appid, md5Key):
+        ''' 交易撤销，全额退款接口
+        :param orgid: 机构id
         :param cusid: 商户id
         :param appid: 应用id
         :param md5Key: 签名所用的key
         '''
         self.values = {}
+        self.values['orgid'] = orgid
         self.values['cusid'] = cusid
         self.values['appid'] = appid
         self.md5Key = md5Key
         self.values['version'] = '11'
 
-    def setAuthType(self, authtype):
-        ''' 授权码类型
+
+    def setOldreqsn(self, oldreqsn):
+        ''' 设置原交易单号
         '''
-        self.values['authtype'] = authtype
+        self.values['oldreqsn'] = oldreqsn
         return self
     
-    def setSubAppid(self, sub_appid):
-        ''' 微信支付appid
+    def setOldtrxid(self, oldtrxid):
+        ''' 原交易流水 oldreqsn和oldtrxid必填其一;建议:商户如果同时拥有oldtrxid和oldreqsn,优先使用oldtrxid 
         '''
-        self.values['sub_appid'] = sub_appid
+        self.values['oldtrxid'] = oldtrxid
         return self
 
-    def authcode(self, authcode, **kw):
-        ''' 获取用户ID
+    def cancel(self, money, reqsn, **kw):
+        ''' 撤销
+        :param money: 支付金额，单位分
+        :param reqsn: 订单号，全局唯一
+        :param **kw: 其他支付信息
         '''
         self.values['randomstr'] = getRandomStr()
-        self.values['authcode'] = authcode
+        self.values['trxamt'] = str(money)
+        self.values['reqsn'] = str(reqsn)
         self.values.update(kw)
 
         self.values['sign'] = createSign(self.values, self.md5Key)
@@ -73,15 +81,20 @@ class AllinAuthCode(object):
                 else:
                     return False
         else:
-            if all (k in self.values for k in ('cusid', 'appid', 'authcode', 'authtype', 'randomstr', 'sign')):
+            if all (k in self.values for k in ('orgid', 'cusid', 'appid', 'reqsn', 'trxamt', 'randomstr', 'sign')):
                 return True
             
         return False
 
     def _post(self):
-        ''' 发送post请求
+        ''' 发送post请求获取二维码
         '''
-        r = requests.post(_AUTH_CODE_TO_USERID_URL, self.values)
+        r = requests.post(_CANCEL_URL, self.values)
         text = json.loads(r.text)
-        _log.info('用户发起支付请求，请求参数：%s，请求结果：%s' % (self.values, text))
+        _log.info('用户发起支付取消请求，请求参数：%s，请求结果：%s' % (self.values, text))
         return text
+
+# if __name__ == "__main__":
+#     allinCancel = AllinCancel.DebugAllinCancel().setOldtrxid('111994120000928109')
+#     res = allinCancel.cancel('1','201909051005')
+#     print(res)

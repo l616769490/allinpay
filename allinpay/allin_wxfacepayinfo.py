@@ -15,17 +15,15 @@ class AllinWXFacePay(object):
     def DebugAllinWXFacePay():
         ''' 测试用的支付接口
         '''
-        return AllinWXFacePay('100581048160005', '990440148166000', '00000003', 'a0ea3fa20dbd7bb4d5abf1d59d63bae8')
+        return AllinWXFacePay('990440148166000', '00000003', 'a0ea3fa20dbd7bb4d5abf1d59d63bae8')
 
-    def __init__(self, orgid, cusid, appid, md5Key):
+    def __init__(self, cusid, appid, md5Key):
         ''' 部分退款接口
-        :param orgid: 机构id
         :param cusid: 商户id
         :param appid: 应用id
         :param md5Key: 签名所用的key
         '''
         self.values = {}
-        self.values['orgid'] = orgid
         self.values['cusid'] = cusid
         self.values['appid'] = appid
         self.md5Key = md5Key
@@ -78,7 +76,7 @@ class AllinWXFacePay(object):
                 else:
                     return False
         else:
-            if all (k in self.values for k in ('orgid', 'cusid', 'appid', 'storeid', 'storename', 'rawdata', 'subappid', 'randomstr', 'sign')):
+            if all (k in self.values for k in ('cusid', 'appid', 'storeid', 'storename', 'rawdata', 'subappid', 'randomstr', 'sign')):
                 return True
             
         return False
